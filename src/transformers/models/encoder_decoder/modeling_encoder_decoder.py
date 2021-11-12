@@ -443,6 +443,9 @@ class EncoderDecoderModel(PreTrainedModel):
             >>> generated = model.generate(input_ids, decoder_start_token_id=model.config.decoder.pad_token_id)
 
         """
+        if decoder_input_ids is not None:
+            warnings.warn(DEPRECATION_WARNING, FutureWarning)
+        
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         kwargs_encoder = {argument: value for argument, value in kwargs.items() if not argument.startswith("decoder_")}
@@ -487,7 +490,6 @@ class EncoderDecoderModel(PreTrainedModel):
         # Compute loss independent from decoder (as some shift the logits inside them)
         loss = None
         if labels is not None:
-            warnings.warn(DEPRECATION_WARNING, FutureWarning)
             logits = decoder_outputs.logits if return_dict else decoder_outputs[1]
             loss_fct = CrossEntropyLoss()
             loss = loss_fct(logits.reshape(-1, self.decoder.config.vocab_size), labels.view(-1))
